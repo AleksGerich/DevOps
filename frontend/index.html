@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Frontend 2.0</title>
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/brython@3.11.3/brython.min.js"></script>
+    <script>
+        const backendUrl = "http://backend:5000";  // URL для доступа к бэкенду из контейнера
+    </script>
+</head>
+<body onload="brython()">
+    <h1>Введите данные</h1>
+    <input type="text" id="input_text" placeholder="Введите текст">
+    <button id="send_button">Отправить</button>
+
+    <h2>Получить данные</h2>
+    <button id="fetch_button">Получить данные из файла</button>
+    <div id="result_output"></div>
+
+    <script type="text/python">
+        from browser import document, window  # Импортируем объект window
+
+        backend_url = "http://127.0.0.1:5000"  # URL бэкенда
+
+        def send_data(event):
+            # Получаем текст из поля ввода
+            input_text = document['input_text'].value
+
+            # Используем стандартный JS fetch для отправки данных
+            window.fetch(f'{backend_url}/submit', {
+                'method': 'POST',
+                'headers': {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                'body': f"data={input_text}"
+            }).then(lambda response: response.text()).then(
+                lambda text: window.alert(f"Ответ сервера: {text}")
+            ).catch(lambda err: window.alert(f"Ошибка: {err}"))
+
+        def update_result_output(text):
+            # Функция для обновления содержимого элемента result_output
+            document['result_output'].innerHTML = text
+
+        def fetch_data(event):
+            # Получаем данные с сервера
+            window.fetch(f'{backend_url}/fetch', {
+                'method': 'GET'
+            }).then(lambda response: response.text()).then(
+                update_result_output  # Вызываем функцию для обновления содержимого
+            ).catch(lambda err: window.alert(f"Ошибка: {err}"))
+
+        # Связываем кнопки с функциями
+        document['send_button'].bind('click', send_data)
+        document['fetch_button'].bind('click', fetch_data)
+    </script>
+</body>
+</html>
